@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { useSurvey } from "@/context/SurveyContext";
 import { useNavigate } from "react-router-dom";
-import { Mic, PencilLine } from "lucide-react";
+import { PenTool, Mic2, ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 const prompts = {
@@ -46,14 +46,17 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
             <CardTitle className="text-2xl">{title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex gap-3 justify-center">
-              <Button variant={mode === 'text' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('text')} disabled={mode === 'audio'}>
-                <PencilLine /> Escrever
-              </Button>
-              <Button variant={mode === 'audio' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('audio')} disabled={mode === 'text'}>
-                <Mic /> Gravar voz
-              </Button>
-            </div>
+            <fieldset>
+              <legend className="sr-only">Escolha o tipo de resposta</legend>
+              <div className="flex gap-3 justify-center">
+                <Button variant={mode === 'text' ? 'default' : 'outline'} size="lg" onClick={() => setMode('text')} disabled={mode === 'audio'}>
+                  <PenTool className="w-5 h-5 mr-2" /> Escrever
+                </Button>
+                <Button variant={mode === 'audio' ? 'default' : 'outline'} size="lg" onClick={() => setMode('audio')} disabled={mode === 'text'}>
+                  <Mic2 className="w-5 h-5 mr-2" /> Gravar voz
+                </Button>
+              </div>
+            </fieldset>
 
             {mode === 'text' && (
               <Textarea
@@ -71,8 +74,14 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
               />
             )}
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => navigate(id === 1 ? '/demographics/residente' : `/q/${id - 1}`)}>Voltar</Button>
-              <Button variant="hero" onClick={next} disabled={!isAnswered}>{id < 3 ? 'Próxima' : 'Revisar'}</Button>
+              <Button variant="outline" onClick={() => navigate(id === 1 ? '/demographics/residente' : `/q/${id - 1}`)}>
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Voltar
+              </Button>
+              <Button variant="default" onClick={next} disabled={!isAnswered}>
+                {id < 3 ? 'Próxima' : 'Revisar'}
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
             </div>
           </CardContent>
         </Card>

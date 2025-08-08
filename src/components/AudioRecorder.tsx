@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
+import { Mic, Square, CheckCircle } from 'lucide-react';
 
 interface AudioRecorderProps {
   onAudioReady: (base64: string | null) => void;
@@ -155,21 +156,33 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxD
       return {
         variant: 'destructive' as const,
         onClick: stop,
-        children: 'Parar',
+        'aria-label': 'Parar gravação',
+        children: <>
+          <Square className="w-5 h-5 mr-2" />
+          Parar
+        </>,
       };
     }
     if (recordingFinished) {
       return {
         variant: 'secondary' as const,
         onClick: () => {},
-        children: 'Já está',
+        'aria-label': 'Gravação finalizada',
         disabled: true,
+        children: <>
+          <CheckCircle className="w-5 h-5 mr-2" />
+          Já está
+        </>,
       };
     }
     return {
       variant: 'default' as const,
       onClick: start,
-      children: 'Gravar áudio',
+      'aria-label': 'Iniciar gravação',
+      children: <>
+        <Mic className="w-5 h-5 mr-2" />
+        Gravar áudio
+      </>,
     };
   };
 
