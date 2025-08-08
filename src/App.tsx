@@ -2,24 +2,42 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Terms from "./pages/Terms";
+import Demographics from "./pages/Demographics";
+import Question from "./pages/Question";
+import ThankYou from "./pages/ThankYou";
+import { SurveyProvider } from "./context/SurveyContext";
 
 const queryClient = new QueryClient();
+
+const QRoute = () => {
+  const { id } = useParams();
+  const num = Number(id);
+  if (![1, 2, 3].includes(num)) return <Navigate to="/q/1" replace />;
+  return <Question id={num as 1 | 2 | 3} />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <SurveyProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/demographics" element={<Demographics />} />
+            <Route path="/q/:id" element={<QRoute />} />
+            <Route path="/thank-you" element={<ThankYou />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </SurveyProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
