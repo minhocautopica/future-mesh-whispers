@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSurvey } from "@/context/SurveyContext";
 import { useNavigate } from "react-router-dom";
-import { Mic, PencilLine, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSurvey } from "@/context/SurveyContext";
+import { useNavigate } from "react-router-dom";
+import { Mic2, FileText, Edit3, ArrowLeft, CheckSquare } from "lucide-react";
 
 const Review = () => {
   const { demographics, responses, submit } = useSurvey();
@@ -44,13 +48,13 @@ const Review = () => {
                   </div>
                   {responses[k].text && (
                     <div className="p-3 rounded-md bg-background/50 border mb-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><PencilLine /> Texto</div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><FileText className="w-5 h-5" /> Texto</div>
                       <p className="whitespace-pre-wrap">{responses[k].text}</p>
                     </div>
                   )}
                   {responses[k].audio && (
                     <div className="p-3 rounded-md bg-background/50 border">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Mic /> Áudio</div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Mic2 className="w-5 h-5" /> Áudio</div>
                       <audio src={responses[k].audio || undefined} controls className="w-full" />
                     </div>
                   )}
@@ -62,8 +66,14 @@ const Review = () => {
             })()}
 
             <div className="flex justify-between pt-2">
-              <Button variant="outline" onClick={() => navigate('/q/3')}>Voltar</Button>
-              <Button variant="hero" onClick={onSend}>Enviar</Button>
+              <Button variant="outline" onClick={() => navigate('/q/3')}>
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Voltar
+              </Button>
+              <Button variant="default" onClick={onSend}>
+                <CheckSquare className="w-5 h-5 mr-2" />
+                Enviar
+              </Button>
             </div>
           </CardContent>
         </Card>

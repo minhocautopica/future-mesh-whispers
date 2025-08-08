@@ -7,71 +7,48 @@
 
 @layer base {
   :root {
-    /* Core palette */
-    --background: 0 0% 9%;        /* #161616 */
-    --foreground: 0 0% 92%;       /* #EAEAEA */
-
-    --card: 0 0% 16%;             /* #2a2a2a */
-    --card-foreground: 0 0% 92%;
-
-    --popover: 0 0% 16%;
-    --popover-foreground: 0 0% 92%;
-
-    --primary: 89 100% 65%;       /* #A9FF4F */
-    --primary-foreground: 0 0% 9%;
-
-    --secondary: 0 0% 13%;
-    --secondary-foreground: 0 0% 92%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 70%;
-
-    --accent: 0 0% 13%;
-    --accent-foreground: 0 0% 92%;
-
-    --destructive: 0 84% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 89 100% 65%;
-
-    --radius: 0.8rem;
-
-    /* Extras */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary) / 0.25), transparent 60%);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.35);
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 173 83% 23%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 90%;
+    --secondary-foreground: 215 25% 27%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 173 78% 29%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 173 83% 23%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    /* Keep parity if dark mode is toggled programmatically */
-    --background: 0 0% 9%;
-    --foreground: 0 0% 92%;
-
-    --card: 0 0% 16%;
-    --card-foreground: 0 0% 92%;
-
-    --popover: 0 0% 16%;
-    --popover-foreground: 0 0% 92%;
-
-    --primary: 89 100% 65%;
-    --primary-foreground: 0 0% 9%;
-
-    --secondary: 0 0% 13%;
-    --secondary-foreground: 0 0% 92%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 70%;
-
-    --accent: 0 0% 13%;
-    --accent-foreground: 0 0% 92%;
-
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 173 83% 23%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 173 78% 29%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 89 100% 65%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 173 83% 23%;
   }
 }
 
@@ -90,9 +67,16 @@
   }
 }
 
-@layer components {
-  .hero-surface {
-    background: radial-gradient(60% 60% at 50% 10%, hsl(var(--primary) / 0.18), transparent 60%),
-                linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 }
