@@ -15,7 +15,7 @@ const Terms = () => {
             <p>• Você pode desistir a qualquer momento.</p>
             <div className="flex gap-4 pt-4">
               <Button variant="hero" size="lg" asChild>
-                <a href="/demographics">ACEITO</a>
+                <a href="/demographics/genero">ACEITO</a>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <a href="/">NÃO ACEITO</a>

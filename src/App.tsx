@@ -7,7 +7,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import Demographics from "./pages/Demographics";
+import DemographicsGender from "./pages/DemographicsGender";
+import DemographicsAge from "./pages/DemographicsAge";
+import DemographicsResident from "./pages/DemographicsResident";
 import Question from "./pages/Question";
+import Review from "./pages/Review";
 import ThankYou from "./pages/ThankYou";
 import { SurveyProvider } from "./context/SurveyContext";
 
@@ -31,7 +35,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/demographics" element={<Demographics />} />
+            <Route path="/demographics/genero" element={<DemographicsGender />} />
+            <Route path="/demographics/idade" element={<DemographicsAge />} />
+            <Route path="/demographics/residente" element={<DemographicsResident />} />
             <Route path="/q/:id" element={<QRoute />} />
+            <Route path="/review" element={<Review />} />
             <Route path="/thank-you" element={<ThankYou />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
