@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Button } from './ui/button';
 
 interface AudioRecorderProps {
   onAudioReady: (base64: string | null) => void;
   maxDurationMs?: number;
+  audioUrl?: string | null;
 }
 
 const MAX_DURATION = 120000; // 2 minutes
 
-export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxDurationMs = MAX_DURATION }) => {
+export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxDurationMs = MAX_DURATION, audioUrl }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingFinished, setRecordingFinished] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(maxDurationMs / 1000);
   const timerRef = useRef<number | null>(null);
@@ -18,6 +21,13 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxD
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+
+  useEffect(() => {
+    if (audioUrl) {
+      setPreviewUrl(audioUrl);
+      setRecordingFinished(true);
+    }
+  }, [audioUrl]);
 
   useEffect(() => {
     return () => {
@@ -78,7 +88,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxD
   };
 
   const start = async () => {
-    if (isRecording) return;
+    if (isRecording || recordingFinished) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
@@ -89,6 +99,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxD
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       mr.onstop = async () => {
+        setIsRecording(false);
+        setRecordingFinished(true);
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
@@ -129,31 +141,46 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioReady, maxD
     if (!isRecording) return;
     if (timerRef.current) window.clearInterval(timerRef.current);
     mediaRecorderRef.current?.stop();
-    setIsRecording(false);
   };
 
   const reset = () => {
     setPreviewUrl(null);
     onAudioReady(null);
+    setRecordingFinished(false);
+    setIsRecording(false);
   };
+
+  const getButtonProps = () => {
+    if (isRecording) {
+      return {
+        variant: 'destructive' as const,
+        onClick: stop,
+        children: 'Parar',
+      };
+    }
+    if (recordingFinished) {
+      return {
+        variant: 'secondary' as const,
+        onClick: () => {},
+        children: 'Já está',
+        disabled: true,
+      };
+    }
+    return {
+      variant: 'default' as const,
+      onClick: start,
+      children: 'Gravar áudio',
+    };
+  };
+
 
   return (
     <div className="w-full space-y-2">
       <div className="flex items-center gap-3">
-        {!isRecording ? (
-          <button className="inline-flex h-12 px-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-            onClick={start} aria-label="Iniciar gravação">
-            Gravar áudio
-          </button>
-        ) : (
-          <button className="inline-flex h-12 px-6 items-center justify-center rounded-md bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-            onClick={stop} aria-label="Parar gravação">
-            Parar
-          </button>
-        )}
+        <Button {...getButtonProps()} size="lg" />
         <span className="text-sm text-muted-foreground">{isRecording ? `Tempo restante: ${timeLeft}s` : 'Máx. 2 min'}</span>
-        {previewUrl && (
-          <button onClick={reset} className="text-sm underline text-primary hover:text-primary/80">Regravar</button>
+        {previewUrl && !isRecording && (
+          <Button onClick={reset} variant="link" className="text-sm">Regravar</Button>
         )}
       </div>
       <div className="bg-card rounded-md border p-3">

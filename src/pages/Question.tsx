@@ -29,6 +29,7 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
 
   const current = responses[key];
   const [mode, setMode] = useState<'text' | 'audio' | null>(current?.audio ? 'audio' : current?.text ? 'text' : null);
+  const isAnswered = !!(current?.text || current?.audio);
 
   const next = async () => {
     if (id < 3) navigate(`/q/${id + 1}`);
@@ -40,16 +41,16 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <main className="container max-w-3xl">
-        <Card>
+        <Card key={id}>
           <CardHeader>
             <CardTitle className="text-2xl">{title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex gap-3 justify-center">
-              <Button variant={mode === 'text' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('text')}>
+              <Button variant={mode === 'text' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('text')} disabled={mode === 'audio'}>
                 <PencilLine /> Escrever
               </Button>
-              <Button variant={mode === 'audio' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('audio')}>
+              <Button variant={mode === 'audio' ? 'hero' : 'outline'} size="lg" onClick={() => setMode('audio')} disabled={mode === 'text'}>
                 <Mic /> Gravar voz
               </Button>
             </div>
@@ -64,11 +65,14 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
             )}
 
             {mode === 'audio' && (
-              <AudioRecorder onAudioReady={(b64) => updateResponse(key, { audio: b64 })} />
+              <AudioRecorder
+                onAudioReady={(b64) => updateResponse(key, { audio: b64 })}
+                audioUrl={current?.audio}
+              />
             )}
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => navigate(id === 1 ? '/demographics/residente' : `/q/${id - 1}`)}>Voltar</Button>
-              <Button variant="hero" onClick={next}>{id < 3 ? 'Próxima' : 'Revisar'}</Button>
+              <Button variant="hero" onClick={next} disabled={!isAnswered}>{id < 3 ? 'Próxima' : 'Revisar'}</Button>
             </div>
           </CardContent>
         </Card>

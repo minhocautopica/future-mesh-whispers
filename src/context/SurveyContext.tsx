@@ -52,7 +52,19 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateResponse: SurveyContextValue['updateResponse'] = (key, value) => {
-    setResponses((prev) => ({ ...prev, [key]: { ...prev[key], ...value } }));
+    setResponses((prev) => {
+      const newKeyResponse: ResponseItem = { };
+
+      if (value.text !== undefined) {
+        newKeyResponse.text = value.text;
+        newKeyResponse.audio = null; // Clear audio
+      } else if (value.audio !== undefined) {
+        newKeyResponse.audio = value.audio;
+        newKeyResponse.text = ''; // Clear text
+      }
+
+      return { ...prev, [key]: newKeyResponse };
+    });
   };
 
   const reset = () => {
