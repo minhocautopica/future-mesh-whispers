@@ -2,10 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSurvey } from "@/context/SurveyContext";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSurvey } from "@/context/SurveyContext";
-import { useNavigate } from "react-router-dom";
 import { Mic2, FileText, Edit3, ArrowLeft, CheckSquare } from "lucide-react";
 
 const Review = () => {
