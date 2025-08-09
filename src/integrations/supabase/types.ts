@@ -14,7 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      answers: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          mime_type: string | null
+          question_key: Database["public"]["Enums"]["question_key"]
+          question_number: number
+          size_bytes: number | null
+          storage_path: string
+          submission_id: string
+          text_content: string | null
+          type: Database["public"]["Enums"]["answer_type"]
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          mime_type?: string | null
+          question_key: Database["public"]["Enums"]["question_key"]
+          question_number: number
+          size_bytes?: number | null
+          storage_path: string
+          submission_id: string
+          text_content?: string | null
+          type: Database["public"]["Enums"]["answer_type"]
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          mime_type?: string | null
+          question_key?: Database["public"]["Enums"]["question_key"]
+          question_number?: number
+          size_bytes?: number | null
+          storage_path?: string
+          submission_id?: string
+          text_content?: string | null
+          type?: Database["public"]["Enums"]["answer_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stations: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          label: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id: string
+          label: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          age: Database["public"]["Enums"]["age_range"] | null
+          consent_given: boolean
+          consent_purpose: string
+          consent_version: string
+          created_at: string
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string
+          resident: boolean | null
+          station_id: string
+          timestamp: string
+          updated_at: string
+        }
+        Insert: {
+          age?: Database["public"]["Enums"]["age_range"] | null
+          consent_given?: boolean
+          consent_purpose?: string
+          consent_version?: string
+          created_at?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          resident?: boolean | null
+          station_id: string
+          timestamp?: string
+          updated_at?: string
+        }
+        Update: {
+          age?: Database["public"]["Enums"]["age_range"] | null
+          consent_given?: boolean
+          consent_purpose?: string
+          consent_version?: string
+          created_at?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          resident?: boolean | null
+          station_id?: string
+          timestamp?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +143,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      age_range: "Até 18" | "19-25" | "26-35" | "36-45" | "46-60" | "60+"
+      answer_type: "text" | "audio"
+      gender: "Masculino" | "Feminino" | "Não-binário" | "Prefiro não responder"
+      question_key: "future_vision" | "magic_wand" | "what_is_missing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +273,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      age_range: ["Até 18", "19-25", "26-35", "36-45", "46-60", "60+"],
+      answer_type: ["text", "audio"],
+      gender: ["Masculino", "Feminino", "Não-binário", "Prefiro não responder"],
+      question_key: ["future_vision", "magic_wand", "what_is_missing"],
+    },
   },
 } as const
