@@ -111,20 +111,9 @@ export async function syncOutbox(endpoint?: string) {
       const p = item.payload || {};
 
       // 1) Create submission
-      const mapGender: Record<string, any> = {
-        'Masculino': 'male',
-        'Feminino': 'female',
-        'Não-binário': 'non_binary',
-        'Prefiro não responder': 'prefer_not_to_say',
-      };
-      const mapAge: Record<string, any> = {
-        'Até 18': 'under_18',
-        '19-25': '19_25',
-        '26-35': '26_35',
-        '36-45': '36_45',
-        '46-60': '46_60',
-        '60+': '60_plus',
-      };
+      // Map demographics directly to DB enums which are Portuguese strings
+      const gender = (p.demographics?.gender ?? null) as any;
+      const age = (p.demographics?.age ?? null) as any;
 
       const { data: subData, error: subError } = await supabase
         .from('submissions')
@@ -132,8 +121,8 @@ export async function syncOutbox(endpoint?: string) {
           {
             station_id: p.station_id,
             timestamp: p.timestamp || new Date().toISOString(),
-            gender: mapGender[p.demographics?.gender as string] ?? null,
-            age: mapAge[p.demographics?.age as string] ?? null,
+            gender,
+            age,
             resident: typeof p.demographics?.resident === 'boolean' ? p.demographics.resident : null,
           },
         ])
