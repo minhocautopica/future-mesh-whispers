@@ -93,12 +93,22 @@ export async function resetCountsIfNewDay() {
 }
 
 export async function syncOutbox(endpoint?: string) {
-  if (!navigator.onLine) return;
+  console.log('[syncOutbox] Attempting to sync...');
+  if (!navigator.onLine) {
+    console.log('[syncOutbox] Offline. Sync aborted.');
+    return;
+  }
+  console.log('[syncOutbox] Online. Proceeding with sync.');
   const db = await getDB();
 
   // Read all items first to avoid keeping an IndexedDB transaction open across awaits
   const items = await db.getAll('outbox');
   const unsynced = items.filter((i: any) => !i.synced);
+  console.log(`[syncOutbox] Found ${unsynced.length} items to sync.`);
+
+  if (unsynced.length === 0) {
+    return;
+  }
 
   const qKeyMap: Record<number, 'future_vision' | 'magic_wand' | 'what_is_missing'> = {
     1: 'future_vision',
@@ -107,10 +117,12 @@ export async function syncOutbox(endpoint?: string) {
   };
 
   for (const item of unsynced) {
+    console.log(`[syncOutbox] Processing item ID: ${item.id}`);
     try {
       const p = item.payload || {};
 
       // 1) Create submission
+      console.log(`[syncOutbox] Inserting submission for item ID: ${item.id}`);
       // Map demographics directly to DB enums which are Portuguese strings
       const gender = (p.demographics?.gender ?? null) as any;
       const age = (p.demographics?.age ?? null) as any;
@@ -130,10 +142,12 @@ export async function syncOutbox(endpoint?: string) {
         .single();
 
       if (subError || !subData) throw subError || new Error('Submission insert failed');
+      console.log(`[syncOutbox] Submission created with ID: ${subData.id}`);
 
       // 2) Prepare and upload answers (text inline, audio to storage)
       const answers: any[] = [];
       const attachments: Array<{ name: string; data: string; mime: string; type: 'text' | 'audio'; question: number }> = p.attachments || [];
+      console.log(`[syncOutbox] Processing ${attachments.length} attachments for submission ID: ${subData.id}`);
 
       for (const att of attachments) {
         const qn = att.question;
@@ -141,12 +155,15 @@ export async function syncOutbox(endpoint?: string) {
         if (!qkey) continue;
 
         if (att.type === 'text') {
+          console.log(`[syncOutbox] Preparing text answer for question ${qn}`);
           // Decode base64 text back to string (we encoded it earlier)
           let text = '';
           try {
             const b64 = (att.data || '').split(',')[1] ?? '';
             text = decodeURIComponent(escape(atob(b64)));
-          } catch {}
+          } catch {
+            // b64 decoding can fail, default to empty string
+          }
 
           answers.push({
             submission_id: subData.id,
@@ -159,6 +176,7 @@ export async function syncOutbox(endpoint?: string) {
             text_content: text,
           });
         } else if (att.type === 'audio') {
+          console.log(`[syncOutbox] Uploading audio answer for question ${qn}`);
           const path = `${p.station_id || 'TOTEM-1'}/${subData.id}/q${qn}.webm`;
           const b64 = (att.data || '').split(',')[1] ?? '';
           const binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -168,6 +186,7 @@ export async function syncOutbox(endpoint?: string) {
             .from('survey')
             .upload(path, blob, { contentType: att.mime || 'audio/webm', upsert: true });
           if (upErr) throw upErr;
+          console.log(`[syncOutbox] Audio uploaded to: ${path}`);
 
           answers.push({
             submission_id: subData.id,
@@ -184,14 +203,18 @@ export async function syncOutbox(endpoint?: string) {
       }
 
       if (answers.length > 0) {
+        console.log(`[syncOutbox] Inserting ${answers.length} answers for submission ID: ${subData.id}`);
         const { error: ansErr } = await supabase.from('answers').insert(answers);
         if (ansErr) throw ansErr;
+        console.log(`[syncOutbox] Answers inserted successfully.`);
       }
 
       // 3) Mark as synced in a separate write
+      console.log(`[syncOutbox] Marking item ID ${item.id} as synced.`);
       await db.put('outbox', { ...item, synced: true, syncedAt: Date.now() });
+      console.log(`[syncOutbox] Item ID ${item.id} successfully synced.`);
     } catch (e) {
-      console.warn('Sync to Supabase failed, will retry later', e);
+      console.error(`[syncOutbox] Sync to Supabase failed for item ID: ${item.id}. Will retry later.`, { item, error: e });
     }
   }
 }
