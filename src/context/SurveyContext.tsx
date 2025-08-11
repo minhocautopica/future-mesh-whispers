@@ -80,6 +80,8 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
       responses,
     };
     const id = await addSubmission(data);
+    // Try to sync immediately
+    await syncOutbox();
     reset();
     return id;
   };

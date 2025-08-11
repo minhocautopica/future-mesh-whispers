@@ -111,14 +111,29 @@ export async function syncOutbox(endpoint?: string) {
       const p = item.payload || {};
 
       // 1) Create submission
+      const mapGender: Record<string, any> = {
+        'Masculino': 'male',
+        'Feminino': 'female',
+        'Não-binário': 'non_binary',
+        'Prefiro não responder': 'prefer_not_to_say',
+      };
+      const mapAge: Record<string, any> = {
+        'Até 18': 'under_18',
+        '19-25': '19_25',
+        '26-35': '26_35',
+        '36-45': '36_45',
+        '46-60': '46_60',
+        '60+': '60_plus',
+      };
+
       const { data: subData, error: subError } = await supabase
         .from('submissions')
         .insert([
           {
             station_id: p.station_id,
             timestamp: p.timestamp || new Date().toISOString(),
-            gender: p.demographics?.gender ?? null as any,
-            age: p.demographics?.age ?? null as any,
+            gender: mapGender[p.demographics?.gender as string] ?? null,
+            age: mapAge[p.demographics?.age as string] ?? null,
             resident: typeof p.demographics?.resident === 'boolean' ? p.demographics.resident : null,
           },
         ])
@@ -158,10 +173,11 @@ export async function syncOutbox(endpoint?: string) {
           const path = `${p.station_id || 'TOTEM-1'}/${subData.id}/q${qn}.webm`;
           const b64 = (att.data || '').split(',')[1] ?? '';
           const binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+          const blob = new Blob([binary], { type: att.mime || 'audio/webm' });
 
           const { error: upErr } = await supabase.storage
             .from('survey')
-            .upload(path, binary, { contentType: att.mime || 'audio/webm', upsert: true });
+            .upload(path, blob, { contentType: att.mime || 'audio/webm', upsert: true });
           if (upErr) throw upErr;
 
           answers.push({
