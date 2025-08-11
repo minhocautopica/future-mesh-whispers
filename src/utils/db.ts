@@ -1,5 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
-
+import { supabase } from '@/integrations/supabase/client';
 interface FERDB extends DBSchema {
   submissions: { key: number; value: any };
   outbox: { key: number; value: any };
@@ -95,31 +95,98 @@ export async function resetCountsIfNewDay() {
 export async function syncOutbox(endpoint?: string) {
   if (!navigator.onLine) return;
   const db = await getDB();
-  const tx = db.transaction('outbox', 'readwrite');
-  const store = tx.objectStore('outbox');
 
-  let cursor = await store.openCursor();
-  while (cursor) {
-    const item = cursor.value;
-    if (!item.synced) {
-      try {
-        if (endpoint) {
-          await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item.payload),
+  // Read all items first to avoid keeping an IndexedDB transaction open across awaits
+  const items = await db.getAll('outbox');
+  const unsynced = items.filter((i: any) => !i.synced);
+
+  const qKeyMap: Record<number, 'future_vision' | 'magic_wand' | 'what_is_missing'> = {
+    1: 'future_vision',
+    2: 'magic_wand',
+    3: 'what_is_missing',
+  };
+
+  for (const item of unsynced) {
+    try {
+      const p = item.payload || {};
+
+      // 1) Create submission
+      const { data: subData, error: subError } = await supabase
+        .from('submissions')
+        .insert([
+          {
+            station_id: p.station_id,
+            timestamp: p.timestamp || new Date().toISOString(),
+            gender: p.demographics?.gender ?? null as any,
+            age: p.demographics?.age ?? null as any,
+            resident: typeof p.demographics?.resident === 'boolean' ? p.demographics.resident : null,
+          },
+        ])
+        .select('id')
+        .single();
+
+      if (subError || !subData) throw subError || new Error('Submission insert failed');
+
+      // 2) Prepare and upload answers (text inline, audio to storage)
+      const answers: any[] = [];
+      const attachments: Array<{ name: string; data: string; mime: string; type: 'text' | 'audio'; question: number }> = p.attachments || [];
+
+      for (const att of attachments) {
+        const qn = att.question;
+        const qkey = qKeyMap[qn as 1 | 2 | 3];
+        if (!qkey) continue;
+
+        if (att.type === 'text') {
+          // Decode base64 text back to string (we encoded it earlier)
+          let text = '';
+          try {
+            const b64 = (att.data || '').split(',')[1] ?? '';
+            text = decodeURIComponent(escape(atob(b64)));
+          } catch {}
+
+          answers.push({
+            submission_id: subData.id,
+            question_number: qn,
+            question_key: qkey,
+            type: 'text',
+            size_bytes: text.length,
+            storage_path: `inline://q${qn}.txt`, // required non-null field
+            mime_type: 'text/plain',
+            text_content: text,
           });
-        } else {
-          // No endpoint configured; simulate success
-          await new Promise((r) => setTimeout(r, 50));
+        } else if (att.type === 'audio') {
+          const path = `${p.station_id || 'TOTEM-1'}/${subData.id}/q${qn}.webm`;
+          const b64 = (att.data || '').split(',')[1] ?? '';
+          const binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+          const { error: upErr } = await supabase.storage
+            .from('survey')
+            .upload(path, binary, { contentType: att.mime || 'audio/webm', upsert: true });
+          if (upErr) throw upErr;
+
+          answers.push({
+            submission_id: subData.id,
+            question_number: qn,
+            question_key: qkey,
+            type: 'audio',
+            size_bytes: binary.byteLength,
+            duration_seconds: null,
+            storage_path: path,
+            mime_type: att.mime || 'audio/webm',
+            text_content: null,
+          });
         }
-        cursor.update({ ...item, synced: true, syncedAt: Date.now() });
-      } catch (e) {
-        // keep in outbox
-        console.warn('Sync failed, will retry later', e);
       }
+
+      if (answers.length > 0) {
+        const { error: ansErr } = await supabase.from('answers').insert(answers);
+        if (ansErr) throw ansErr;
+      }
+
+      // 3) Mark as synced in a separate write
+      await db.put('outbox', { ...item, synced: true, syncedAt: Date.now() });
+    } catch (e) {
+      console.warn('Sync to Supabase failed, will retry later', e);
     }
-    cursor = await cursor.continue();
   }
-  await tx.done;
 }
