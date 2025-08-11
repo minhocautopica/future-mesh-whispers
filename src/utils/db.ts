@@ -121,32 +121,29 @@ export async function syncOutbox(endpoint?: string) {
     try {
       const p = item.payload || {};
 
-      // 1) Create submission
-      console.log(`[syncOutbox] Inserting submission for item ID: ${item.id}`);
-      // Map demographics directly to DB enums which are Portuguese strings
-      const gender = (p.demographics?.gender ?? null) as any;
-      const age = (p.demographics?.age ?? null) as any;
+      // 1) Create submission via secure RPC call
+      console.log(`[syncOutbox] Inserting submission for item ID: ${item.id} via RPC`);
 
-      const { data: subData, error: subError } = await supabase
-        .from('submissions')
-        .insert([
-          {
-            station_id: p.station_id,
-            timestamp: p.timestamp || new Date().toISOString(),
-            gender,
-            age,
-            resident: typeof p.demographics?.resident === 'boolean' ? p.demographics.resident : null,
-          },
-        ])
-        .select('id')
-        .single();
+      const { data: new_submission_id, error: subError } = await supabase
+        .rpc('submit_survey', {
+          station_id_arg: p.station_id,
+          gender_arg: p.demographics?.gender ?? null,
+          age_arg: p.demographics?.age ?? null,
+          resident_arg: typeof p.demographics?.resident === 'boolean' ? p.demographics.resident : null,
+        });
 
-      if (subError || !subData) throw subError || new Error('Submission insert failed');
+      if (subError || !new_submission_id) {
+        console.error('RPC `submit_survey` failed:', subError);
+        throw subError || new Error('Submission via RPC failed');
+      }
+
+      // Adapt the RPC response to the format the rest of the code expects
+      const subData = { id: new_submission_id };
       console.log(`[syncOutbox] Submission created with ID: ${subData.id}`);
 
       // 2) Prepare and upload answers (text inline, audio to storage)
       const answers: any[] = [];
-      const attachments: Array<{ name: string; data: string; mime: string; type: 'text' | 'audio'; question: number }> = p.attachments || [];
+      const attachments: Array<{ name: string; data: string; mime:string; type: 'text' | 'audio'; question: number }> = p.attachments || [];
       console.log(`[syncOutbox] Processing ${attachments.length} attachments for submission ID: ${subData.id}`);
 
       for (const att of attachments) {
