@@ -9,7 +9,7 @@ const ThankYou = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-center px-6">
+    <div className="min-h-screen flex items-center justify-center text-center px-6 pt-48">
       <main className="container max-w-lg space-y-4">
         <h1 className="text-4xl">Obrigado por partilhar a sua visão!</h1>
         <p className="text-lg text-muted-foreground">A sua participação foi registrada.</p>

@@ -43,7 +43,7 @@ const Question = ({ id }: { id: 1 | 2 | 3 }) => {
       <main className="container max-w-3xl">
         <Card key={id}>
           <CardHeader>
-            <CardTitle className="text-2xl">{title}</CardTitle>
+            <CardTitle className="text-2xl text-center">{title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <fieldset>
