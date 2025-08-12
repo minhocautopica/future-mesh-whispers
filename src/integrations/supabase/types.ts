@@ -140,7 +140,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_survey: {
+        Args: {
+          station_id_arg: string
+          gender_arg?: string
+          age_arg?: string
+          resident_arg?: boolean
+        }
+        Returns: string
+      }
     }
     Enums: {
       age_range: "Até 18" | "19-25" | "26-35" | "36-45" | "46-60" | "60+"

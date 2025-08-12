@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 
 type Toast = {
   id: string
@@ -6,6 +6,8 @@ type Toast = {
   description?: string
   action?: React.ReactElement
   variant?: "default" | "destructive"
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const TOAST_LIMIT = 1
@@ -22,7 +24,7 @@ type ToasterToast = Toast & {
   id: string
 }
 
-const listeners: Array<(toasts: ToasterToast[]) => void> = []
+const listeners: Array<(state: typeof memoryState) => void> = []
 
 let memoryState: {
   toasts: ToasterToast[]
@@ -39,7 +41,7 @@ type Action =
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
-    listener(memoryState.toasts)
+    listener(memoryState)
   })
 }
 
@@ -122,15 +124,13 @@ function toast({ ...props }: Omit<ToasterToast, "id">) {
 function useToast() {
   const [state, setState] = useState<typeof memoryState>(memoryState)
 
-  useState(() => {
+  useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)
-      if (index > -1) {
-        listeners.splice(index, 1)
-      }
+      if (index > -1) listeners.splice(index, 1)
     }
-  })
+  }, [])
 
   return {
     ...state,
