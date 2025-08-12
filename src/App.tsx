@@ -12,22 +12,22 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <SurveyProvider>
-            <Router>
-                <div className="App">
-                    <AppRoutes />
-                </div>
-                <Toaster />
-                <Sonner />
-            </Router>
-        </SurveyProvider>
-      </ThemeProvider>
+      <SurveyProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Router>
+            <div className="App">
+              <AppRoutes />
+            </div>
+            <Toaster />
+            <Sonner />
+          </Router>
+        </ThemeProvider>
+      </SurveyProvider>
     </QueryClientProvider>
   );
 }
