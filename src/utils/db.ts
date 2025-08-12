@@ -199,12 +199,28 @@ export async function syncOutbox(endpoint?: string) {
         }
       }
 
-      if (answers.length > 0) {
-        console.log(`[syncOutbox] Inserting ${answers.length} answers for submission ID: ${subData.id}`);
-        const { error: ansErr } = await supabase.from('answers').insert(answers);
-        if (ansErr) throw ansErr;
-        console.log(`[syncOutbox] Answers inserted successfully.`);
-      }
+      // Ensure all 3 questions produce at least one row (even if empty)
+      const presentQs = new Set(answers.map((a) => a.question_number));
+      ([(1 as const), (2 as const), (3 as const)]).forEach((qn) => {
+        if (!presentQs.has(qn)) {
+          const qkey = qKeyMap[qn];
+          answers.push({
+            submission_id: subData.id,
+            question_number: qn,
+            question_key: qkey,
+            type: 'text',
+            size_bytes: 0,
+            storage_path: `inline://q${qn}.txt`,
+            mime_type: 'text/plain',
+            text_content: '',
+          });
+        }
+      });
+
+      console.log(`[syncOutbox] Inserting ${answers.length} answers for submission ID: ${subData.id}`);
+      const { error: ansErr } = await supabase.from('answers').insert(answers);
+      if (ansErr) throw ansErr;
+      console.log(`[syncOutbox] Answers inserted successfully.`);
 
       // 3) Mark as synced in a separate write
       console.log(`[syncOutbox] Marking item ID ${item.id} as synced.`);
