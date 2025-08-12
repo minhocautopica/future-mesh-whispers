@@ -9,7 +9,7 @@ const HeaderLogo = () => {
   if (isReviewPage) return null;
   
   return (
-    <header className="fixed inset-x-0 top-6 z-50 pointer-events-none" aria-label="Site logo">
+    <header className={`fixed inset-x-0 z-50 pointer-events-none ${isThankYouPage ? 'top-8' : 'top-6'}`} aria-label="Site logo">
       <div className={`container max-w-3xl mx-auto px-6 ${isThankYouPage ? 'text-center' : ''}`}>
         <Link
           to="/"
