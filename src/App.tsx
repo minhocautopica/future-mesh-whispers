@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import AppRoutes from './AppRoutes';
 import { SurveyProvider } from './context/SurveyContext';
+import HeaderLogo from '@/components/HeaderLogo';
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <SurveyProvider>
         <Router>
+          <HeaderLogo />
           <div className="App">
             <AppRoutes />
           </div>

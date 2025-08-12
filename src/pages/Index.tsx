@@ -13,13 +13,6 @@ const Index = () => {
       />
       <ConnectionBadge />
 
-      {/* Logo topo esquerdo */}
-      <img
-        src="/lovable-uploads/be59a410-541d-4f1a-b906-40f6c6ceaf12.png"
-        alt="Logo Futuro em Rede Guimarães"
-        className="absolute left-4 top-4 h-10 w-10 rounded-full object-cover shadow-sm ring-1 ring-border"
-        loading="lazy"
-      />
 
       <main className="container max-w-3xl mx-auto text-left px-6">
         <header className="mb-10 animate-fade-in">
