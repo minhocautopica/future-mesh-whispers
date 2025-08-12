@@ -135,11 +135,43 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      submission_exists: {
+        Args: { _id: string }
+        Returns: boolean
+      }
       submit_survey: {
         Args: {
           station_id_arg: string
@@ -153,6 +185,7 @@ export type Database = {
     Enums: {
       age_range: "Até 18" | "19-25" | "26-35" | "36-45" | "46-60" | "60+"
       answer_type: "text" | "audio"
+      app_role: "admin" | "researcher"
       gender: "Masculino" | "Feminino" | "Não-binário" | "Prefiro não responder"
       question_key: "future_vision" | "magic_wand" | "what_is_missing"
     }
@@ -284,6 +317,7 @@ export const Constants = {
     Enums: {
       age_range: ["Até 18", "19-25", "26-35", "36-45", "46-60", "60+"],
       answer_type: ["text", "audio"],
+      app_role: ["admin", "researcher"],
       gender: ["Masculino", "Feminino", "Não-binário", "Prefiro não responder"],
       question_key: ["future_vision", "magic_wand", "what_is_missing"],
     },
