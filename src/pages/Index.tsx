@@ -14,7 +14,7 @@ const Index = () => {
       <ConnectionBadge />
 
 
-      <main className="container max-w-3xl mx-auto text-left px-4 md:px-6 pt-64 md:pt-72">
+      <main className="container max-w-3xl mx-auto text-left px-4 md:px-6 pt-32 md:pt-40 lg:pt-48">
         <header className="mb-8 md:mb-10 animate-fade-in">
           <h1 className="text-3xl md:text-4xl lg:text-5xl leading-tight font-display text-foreground break-words">
             Já pensaste como será o futuro em Guimarães?
