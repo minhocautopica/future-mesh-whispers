@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -15,8 +16,8 @@ const HeaderLogo = () => {
   };
   
   const getTopPosition = () => {
-    if (isThankYouPage) return "top-6";
-    if (isHomePage) return "top-6 md:top-8";
+    if (isThankYouPage) return "top-4 md:top-6";
+    if (isHomePage) return "top-4 md:top-6";
     return "top-6";
   };
   
